@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Shipment Management Form</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://login2explore.com/jpdb/resources/js/jpdb-common.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Shipment Management Form</h2>
+  <form id="shipmentForm">
+    <div class="form-group">
+      <label for="shipNo">Shipment No (Primary Key)</label>
+      <input type="text" class="form-control" id="shipNo" required>
+    </div>
+    <div class="form-group">
+      <label for="desc">Description</label>
+      <input type="text" class="form-control" id="desc" disabled required>
+    </div>
+    <div class="form-group">
+      <label for="source">Source</label>
+      <input type="text" class="form-control" id="source" disabled required>
+    </div>
+    <div class="form-group">
+      <label for="dest">Destination</label>
+      <input type="text" class="form-control" id="dest" disabled required>
+    </div>
+    <div class="form-group">
+      <label for="shipDate">Shipping Date</label>
+      <input type="date" class="form-control" id="shipDate" disabled required>
+    </div>
+    <div class="form-group">
+      <label for="delDate">Expected Delivery Date</label>
+      <input type="date" class="form-control" id="delDate" disabled required>
+    </div>
+    <div class="text-center">
+      <button type="button" class="btn btn-success" id="saveBtn" onclick="saveData()" disabled>Save</button>
+      <button type="button" class="btn btn-warning" id="updateBtn" onclick="updateData()" disabled>Update</button>
+      <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  const baseUrl = "http://api.login2explore.com:5577";
+  const token = "90939484|-31949361007373063|90949803";
+  const dbName = "DELIVERY-DB";
+  const relName = "SHIPMENT-TABLE";
+
+  $(document).ready(function() {
+    resetForm();
+    $('#shipNo').prop("disabled", false).focus();
+
+    $('#shipNo').on("blur", function() {
+      const id = $('#shipNo').val().trim();
+      if (id === "") return;
+      checkShipment(id);
+    });
+  });
+
+  function checkShipment(id) {
+    let getReq = createGET_BY_KEYRequest(token, dbName, relName, JSON.stringify({ "Shipment-No": id }));
+    $.ajax({
+      type: "POST",
+      url: baseUrl + "/api/irl",
+      data: getReq,
+      contentType: "application/json",
+      success: function (result) {
+        if (result.data) {
+          let data = JSON.parse(result.data).record;
+          $('#desc').val(data.Description);
+          $('#source').val(data.Source);
+          $('#dest').val(data.Destination);
+          $('#shipDate').val(data["Shipping-Date"]);
+          $('#delDate').val(data["Expected-Delivery-Date"]);
+          enableForm();
+          $('#shipNo').prop("disabled", true);
+          $('#saveBtn').prop("disabled", true);
+          $('#updateBtn').prop("disabled", false);
+        } else {
+          enableForm();
+          $('#saveBtn').prop("disabled", false);
+          $('#updateBtn').prop("disabled", true);
+        }
+      }
+    });
+  }
+
+  function enableForm() {
+    $('#desc, #source, #dest, #shipDate, #delDate').prop("disabled", false);
+  }
+
+  function resetForm() {
+    $('#shipmentForm')[0].reset();
+    $('#shipNo').prop("disabled", false).focus();
+    $('#desc, #source, #dest, #shipDate, #delDate').prop("disabled", true);
+    $('#saveBtn, #updateBtn').prop("disabled", true);
+  }
+
+  function saveData() {
+    let obj = collectData();
+    if (!obj) return;
+    let putReq = createPUTRequest(token, JSON.stringify(obj), dbName, relName);
+    $.ajax({
+      type: "POST",
+      url: baseUrl + "/api/iml",
+      data: putReq,
+      contentType: "application/json",
+      success: function () {
+        alert("Record saved successfully!");
+        resetForm();
+      }
+    });
+  }
+
+  function updateData() {
+    let obj = collectData();
+    if (!obj) return;
+    let putReq = createPUTRequest(token, JSON.stringify(obj), dbName, relName);
+    $.ajax({
+      type: "POST",
+      url: baseUrl + "/api/iml",
+      data: putReq,
+      contentType: "application/json",
+      success: function () {
+        alert("Record updated successfully!");
+        resetForm();
+      }
+    });
+  }
+
+  function collectData() {
+    const shipNo = $('#shipNo').val().trim();
+    const desc = $('#desc').val().trim();
+    const source = $('#source').val().trim();
+    const dest = $('#dest').val().trim();
+    const shipDate = $('#shipDate').val();
+    const delDate = $('#delDate').val();
+
+    if (!shipNo || !desc || !source || !dest || !shipDate || !delDate) {
+      alert("Please fill in all fields.");
+      return null;
+    }
+
+    return {
+      "Shipment-No": shipNo,
+      "Description": desc,
+      "Source": source,
+      "Destination": dest,
+      "Shipping-Date": shipDate,
+      "Expected-Delivery-Date": delDate
+    };
+  }
+</script>
+</body>
+</html>
