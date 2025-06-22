@@ -8,7 +8,7 @@ This project is a simple, responsive **Shipment Management Form** built using **
 
 -  `Shipment-No` as the **Primary Key**
 -  Save new shipment records
-- ✏ Update existing shipment records
+-  Update existing shipment records
 -  Reset the form any time
 -  Validates input fields (no empty values allowed)
 -  Lightweight and works directly in your browser
