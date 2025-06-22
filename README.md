@@ -79,7 +79,7 @@ The form communicates with JPDB using the `PUT` (Replace) and `GET_BY_KEY` APIs 
 
 ---
 
-## 🖼 Illustrations
+##  Illustrations
 
 ![Screenshot of the shipment form](screenshot.png)  
 *(Add your screenshot with the name `screenshot.png` in the repo)*
